@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    name: Backend (.NET 9)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installer .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restaurer les dépendances
+        run: dotnet restore Backend/SmartMeeting.Api.csproj
+
+      - name: Compiler le backend
+        run: dotnet build Backend/SmartMeeting.Api.csproj --configuration Release --no-restore
+
+      - name: Exécuter les tests
+        run: dotnet test Tests/SmartMeeting.Tests.csproj --configuration Release --verbosity normal
+
+  frontend:
+    name: Frontend (Angular)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Installer Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Installer les dépendances
+        working-directory: Frontend
+        run: npm install
+
+      - name: Compiler le frontend
+        working-directory: Frontend
+        run: npm run build
+
+  docker:
+    name: Images Docker
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Construire l'image backend
+        run: docker build -t smartmeeting-api ./Backend
+
+      - name: Construire l'image frontend
+        run: docker build -t smartmeeting-web ./Frontend
