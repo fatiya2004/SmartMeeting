@@ -1,4 +1,4 @@
-# SmartMeeting CHU — Gestion intelligente des réunions
+﻿# SmartMeeting CHU — Gestion intelligente des réunions
 
 Application web de gestion des réunions et des salles pour un établissement hospitalier,
 avec assistant IA (langage naturel), détection des conflits et notifications par email.
@@ -26,7 +26,6 @@ docker compose up --build
 |------------------|---------------------------------|
 | Application      | http://localhost:4200           |
 | API (Swagger)    | http://localhost:8080/swagger   |
-| Boîte mail test  | http://localhost:8025           |
 | PostgreSQL       | localhost:5432                  |
 
 Pour activer l'assistant IA, renseignez `LLM_API_KEY` dans `.env`. Sans cette clé, toute
@@ -48,7 +47,6 @@ Mot de passe commun : `Password123!`
 1. Se connecter via `POST /api/auth/login` avec le compte admin.
 2. Copier le token et l'utiliser dans Swagger (bouton **Authorize**).
 3. Appeler `POST /api/email-test?to=test@exemple.ma`.
-4. Ouvrir http://localhost:8025 : l'email apparaît dans MailHog.
 
 ## Structure
 
@@ -94,3 +92,18 @@ SmartMeeting/
 
 - `docs/DOCUMENTATION.md` — architecture, flux, règles métier, démonstration
 - `docs/QUESTIONS-ENTRETIEN.md` — questions de jury avec réponses courtes
+
+## Mise en place étape par étape
+
+1. Cloner le dépôt puis créer le fichier d'environnement : `cp .env.example .env` (sous Windows : `copy .env.example .env`).
+2. Dans `.env`, renseigner `JWT_SECRET` (clé de 32 caractères minimum).
+3. Pour les emails, créer un **mot de passe d'application Gmail** (compte Google > Sécurité > Mots de passe d'application), puis renseigner `SMTP_USER`, `SMTP_PASSWORD` (sans espaces) et `SMTP_FROM` dans `.env`. Ne jamais écrire ces valeurs dans `docker-compose.yml`.
+4. Optionnel : renseigner `LLM_API_KEY` pour activer l'assistant IA.
+5. Lancer l'application : `docker compose up --build`, puis ouvrir http://localhost:4200.
+6. Se connecter avec un compte de démonstration (voir plus haut). Créer une réunion (formulaire classique ou assistant IA) : chaque participant reçoit une invitation par email.
+7. Un administrateur ou une secrétaire approuve la demande depuis la page **Demandes** : un email de confirmation est envoyé à tous.
+
+## Dépannage
+
+- **Connexion impossible avec les comptes de démonstration** : ils ne sont créés que si la base est vide. Vérifier les comptes existants avec `docker compose exec db psql -U postgres -d smartmeeting -c 'SELECT "Email","Role" FROM "Users";'`.
+- **Aucun email reçu** : vérifier la colonne `IsSent` de la table `Notifications`. Si elle vaut `f`, le mot de passe d'application Gmail est invalide : en créer un nouveau, mettre à jour `.env`, puis `docker compose up -d api`.
