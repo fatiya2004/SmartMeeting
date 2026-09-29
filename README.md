@@ -1,6 +1,6 @@
-﻿# SmartMeeting CHU — Gestion intelligente des réunions
+# SmartMeeting CHU — Gestion intelligente des réunions
 
-Application web de gestion des réunions et des salles pour un établissement hospitalier,
+Projet réalisé pour le Centre Hospitalier Universitaire d'Oujda : application web de gestion des réunions et des salles pour un établissement hospitalier,
 avec assistant IA (langage naturel), détection des conflits et notifications par email.
 
 ## Pile technique
